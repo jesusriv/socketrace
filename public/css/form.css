@@ -1,0 +1,9 @@
+#startF {
+  height: 100%;
+  width: 50%;
+  justify-self: center;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
