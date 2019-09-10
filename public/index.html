@@ -12,17 +12,56 @@
   <script>
     $(document).ready(function () {
         let socket = io();
+        let clicked = false;
         let score = {
           0: 0,
-          1: 0,
-          2: 0,
-          3: 0
+          1: 0
         };
 
-        for (let i = 0; i < 4; i++) {
-          $('#field').append(`<div class='player${i}'></div>`);
-          $('#btns').append(`<button id="btn${i}" class="btn btn-primary">Go</button>`)
+        const funcs = {
+          // SETBACK
+          0: id => {
+            let y = Math.floor(Math.random() * 2);
+            if (y == 0) {
+              funcs.move(id, 20);
+            } else {
+              for(let i = 0; i < 2; i++) {
+                i == id ? null : funcs.move(i, 20);
+              }
+            }
+            $(`#fun${id}`).remove();
+            clicked = false;
+          },
+          // FREEZE
+          1: id => {
+            for (let i = 0; i < 2; i++) {
+              i == id ? null : $(`#btn${i}`).remove();
+              i == id ? null : setTimeout(() => {
+                $(`.btnGroup${i}`).append(`<button id="btn${i}" class="btn btn-primary">Go</button>`)
+              }, 1500);
+            }
+            $(`#fun${id}`).remove();
+            clicked = false;
+          },
+          power: id => {
+            $(`.btnGroup${id}`).append(`<button id="fun${id}" class="btn btn-primary">Detonate</button>`)
+            let x = Math.floor(Math.random() * 2);
+            $(`#fun${id}`).click(() => funcs[x](id));
+          },
+          move: (id, amnt) => {
+            score[id] += amnt;
+            if (score[id] == -280) {
+              $('#main').html(`<h1>Player ${id} wins!!!</h1><img src='https://media.giphy.com/media/lMameLIF8voLu8HxWV/giphy.gif'>`);
+            }
+            $(`.player${id}`).css({top: `${score[id]}px`});
+            socket.emit('update', {score: score[id], player: id});
+          }
         }
+
+        socket.on('begin', () => {
+          $("#start").hide();
+          $("#main").css({display: "flex"});
+        });
 
         socket.on('scores', data => {
           score[data['player']] = data['score'];
@@ -32,19 +71,25 @@
           $(`.player${data['player']}`).css({top: `${data['score']}px`});
         });
 
-        $('#btns').on('click', '#btn1', () => {
-          $('.player1').css({top: '-10px'});
-        })
+        for (let i = 0; i < 2; i++) {
+          $('#field').append(`<div class='player${i}'></div>`);
+          $('#btns').append(`<div class="btnGroup${i}"><button id="btn${i}" class="btn btn-primary">Go</button></div>`)
+          $(`.btnGroup${i}`).css({width: "15%"});
+          $(`.btnGroup${i}`).css({display: "flex"});
+          $(`.btnGroup${i}`).css({flexDirection: "column"});
+          $(`.btnGroup${i}`).css({justifyContent: "space-around"});
+        }
 
-
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 2; i++) {
           $('#btns').on('click', `#btn${i}`, () => {
-            score[i] -= 5;
-            if (score[i] == -280) {
-              $('#main').html(`<h1>Player ${i} wins!!!</h1><img src='https://media.giphy.com/media/lMameLIF8voLu8HxWV/giphy.gif'>`);
+            if(!clicked) {
+              let x = Math.floor(Math.random() * 2);
+              setTimeout(() => {
+                funcs.power(x);
+              }, 2000);
+              clicked = true;
             }
-            $(`.player${i}`).css({top: `${score[i]}px`});
-            socket.emit('update', {score: score[i], player: i});
+            funcs.move(i, -5);
           });
         }
       });
@@ -52,13 +97,7 @@
 </head>
 <body>
   <div id="start">
-    <form id="startF">
-      <div class="form-group">
-        <label for="players">How many players?</label>
-        <input class='form-control' type="number" name="players" id="playerForm">
-      </div>
-      <button class="btn btn-primary">Go</button>
-    </form>
+    <h1>Waiting on a second player...</h1>
   </div>
   <div id="main">
     <h1>Socket Race</h1>
