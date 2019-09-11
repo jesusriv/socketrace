@@ -10,10 +10,17 @@ let clients = [];
 
 io.on('connection', socket => {
 
-  clients.push(socket.id);
+  if(clients.length > 0) {
+    clients.unshift(socket.id);
+    socket.broadcast.emit("id", 1);
+  } else {
+    clients.push(socket.id);
+  }
+
+  socket.emit('id', clients.indexOf(socket.id));
 
   if (clients.length >= 2) {
-    socket.emit("begin", clients.indexOf(socket.id));
+    socket.emit("begin");
     socket.broadcast.emit("begin")
   }
 

@@ -47,7 +47,7 @@
           power: id => {
             $(`.btnGroup${id}`).append(`<button id="fun${id}" class="btn btn-primary">Detonate</button>`)
             let x = Math.floor(Math.random() * 2);
-            $(`#fun${id}`).css({marginTop: "10px;"})
+            $(`#fun${id}`).css({marginTop: "20px"})
             $(`#fun${id}`).click(() => {
               socket.emit('detonate', {x, id});
               funcs[x](id)
@@ -64,10 +64,13 @@
           }
         }
 
-        socket.on('begin', (data) => {
+        socket.on('id', i => {
+          $(`#btns`).html(`<div class="btnGroup${i}"><button id="btn${i}" class="btn btn-primary">Go</button></div>`);
+        });
+
+        socket.on('begin', i => {
           $("#start").hide();
           $("#main").css({display: "flex"});
-          console.log(data)
         });
 
         socket.on('power', x => {
@@ -76,6 +79,7 @@
         });
 
         socket.on('remove', id => {
+          console.log(id);
           $(`#fun${id}`).remove();
         });
 
