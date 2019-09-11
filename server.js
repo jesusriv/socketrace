@@ -13,7 +13,7 @@ io.on('connection', socket => {
   clients.push(socket.id);
 
   if (clients.length >= 2) {
-    socket.emit("begin");
+    socket.emit("begin", clients.indexOf(socket.id));
     socket.broadcast.emit("begin")
   }
 
