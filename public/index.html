@@ -31,7 +31,6 @@
             }
             $(`#fun${id}`).remove();
             clicked = false;
-            socket.emit('click');
           },
           // FREEZE
           1: id => {
@@ -44,12 +43,14 @@
             $(`#fun${id}`).remove();
             socket.emit('remove', id);
             clicked = false;
-            socket.emit('click');
           },
           power: id => {
             $(`.btnGroup${id}`).append(`<button id="fun${id}" class="btn btn-primary">Detonate</button>`)
             let x = Math.floor(Math.random() * 2);
-            $(`#fun${id}`).click(() => funcs[x](id));
+            $(`#fun${id}`).click(() => {
+              socket.emit('detonate', {x, id});
+              funcs[x](id)
+            });
           },
           move: (id, amnt) => {
             score[id] += amnt;
@@ -75,8 +76,9 @@
           $(`#fun${id}`).remove();
         });
 
-        socket.on('click', () => clicked = false);
-        socket.on('clicked', () => clicked = true);
+        socket.on('detonate', data => {
+          funcs[data.x](data.id);
+        });
 
         socket.on('scores', data => {
           score[data['player']] = data['score'];
@@ -100,6 +102,7 @@
             if(!clicked) {
               let x = Math.floor(Math.random() * 2);
               setTimeout(() => {
+                funcs.power(x);
                 socket.emit('power', x);
               }, 2000);
               clicked = true;

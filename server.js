@@ -22,7 +22,6 @@ io.on('connection', socket => {
   });
 
   socket.on('power', x => {
-    socket.emit('power', x);
     socket.broadcast.emit('power', x);
   });
 
@@ -30,8 +29,9 @@ io.on('connection', socket => {
     socket.broadcast.emit('remove', id);
   });
 
-  socket.on('click', () => socket.broadcast.emit('click'));
-  socket.on("clicked", () => socket.broadcast.emit("clicked"));
+  socket.on('detonate', data => {
+    socket.broadcast.emit('detonate', {x: data.x, id: data.id});
+  });
   
   socket.on("disconnect", () => {
     let i = clients.indexOf(socket.id);
