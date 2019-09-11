@@ -37,9 +37,9 @@
             for (let i = 0; i < 2; i++) {
               i == id ? null : $(`#btn${i}`).remove();
               i == id ? null : setTimeout(() => {
-                $(`.btnGroup${i}`).append(`<button id="btn${i}" class="btn btn-primary">Go</button>`)
-              }, 1500);
-            }
+                  $(`.btnGroup${i}`).append(`<button id="btn${i}" class="btn btn-primary">Go</button>`)
+                }, 1500);
+              }
             $(`#fun${id}`).remove();
             socket.emit('remove', id);
             clicked = false;
@@ -47,6 +47,7 @@
           power: id => {
             $(`.btnGroup${id}`).append(`<button id="fun${id}" class="btn btn-primary">Detonate</button>`)
             let x = Math.floor(Math.random() * 2);
+            $(`#fun${id}`).css({marginTop: "10px;"})
             $(`#fun${id}`).click(() => {
               socket.emit('detonate', {x, id});
               funcs[x](id)
@@ -59,12 +60,14 @@
             }
             $(`.player${id}`).css({top: `${score[id]}px`});
             socket.emit('update', {score: score[id], player: id});
+            amnt -= 5;
           }
         }
 
-        socket.on('begin', () => {
+        socket.on('begin', (data) => {
           $("#start").hide();
           $("#main").css({display: "flex"});
+          console.log(data)
         });
 
         socket.on('power', x => {
@@ -90,11 +93,9 @@
 
         for (let i = 0; i < 2; i++) {
           $('#field').append(`<div class='player${i}'></div>`);
-          $('#btns').append(`<div class="btnGroup${i}"><button id="btn${i}" class="btn btn-primary">Go</button></div>`)
           $(`.btnGroup${i}`).css({width: "15%"});
           $(`.btnGroup${i}`).css({display: "flex"});
           $(`.btnGroup${i}`).css({flexDirection: "column"});
-          $(`.btnGroup${i}`).css({justifyContent: "space-around"});
         }
 
         for (let i = 0; i < 2; i++) {
