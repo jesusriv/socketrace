@@ -20,6 +20,18 @@ io.on('connection', socket => {
   socket.on('update', data => {
     socket.broadcast.emit('scores', {score: data['score'], player: data['player']})
   });
+
+  socket.on('power', x => {
+    socket.broadcast.emit('power', x);
+  });
+
+  socket.on('remove', id => {
+    socket.broadcast.emit('remove', id);
+  });
+
+  socket.on('detonate', data => {
+    socket.broadcast.emit('detonate', {x: data.x, id: data.id});
+  });
   
   socket.on("disconnect", () => {
     let i = clients.indexOf(socket.id);
